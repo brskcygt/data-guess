@@ -1,9 +1,10 @@
 import { ColDef } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { CountryTable } from "../style/App.style";
 import { Grid } from "@mui/material";
 import { Pagination } from "./Pagination";
+import { TableSearch } from "./TableSearch";
 
 type Language = {
   name: string;
@@ -36,7 +37,6 @@ const defaultColDef = {
 };
 
 export const Table = (props: Props) => {
-  console.log(props.countries);
   const gridRef = useRef<AgGridReact>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -86,36 +86,84 @@ export const Table = (props: Props) => {
     }
   }, []);
 
+  const onGridReady = (event: any): void => {
+    const nodes = event.api.getRenderedNodes();
+    if (nodes.length) {
+      nodes[9].setSelected(true);
+    }
+  };
+
+  const onModelUpdated = () => {
+    const nodes = gridRef?.current?.api.getRenderedNodes();
+    if (nodes.length > 0) {
+      let selectedRowIndex = 9;
+
+      if (nodes.length < 10) {
+        selectedRowIndex = nodes.length - 1;
+      }
+
+      const selectedNode = nodes[selectedRowIndex];
+      const previouslySelectedNode =
+        gridRef?.current?.api.getSelectedNodes()[0];
+
+      if (selectedNode !== previouslySelectedNode) {
+        selectedNode.setSelected(true);
+      }
+    }
+  };
+
+  const onRowClicked = (event: any): void => {
+    const selectedNode = event.node;
+    const isSelected = selectedNode.isSelected();
+
+    if (isSelected) {
+      selectedNode.setSelected(false);
+    } else {
+      selectedNode.setSelected(true);
+    }
+  };
+
   return (
-    <Grid>
+    <Grid display="flex" flexDirection="column" gap={5}>
+      <Grid
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        padding="20px 0"
+      >
+        <TableSearch gridRef={gridRef} />
+      </Grid>
       <Grid>
-        <div
-          className="ag-theme-material"
-          style={{ height: "500px", width: "100%" }}
-        >
+        <div className="ag-theme-alpine-dark">
           <CountryTable
             ref={gridRef}
             rowData={props.countries || []}
             columnDefs={columnDefs}
             defaultColDef={defaultColDef}
             rowHeight={50}
-            paginationPageSize={10}
+            paginationPageSize={15}
             suppressPaginationPanel
             domLayout="autoHeight"
-            suppressRowClickSelection
             pagination
+            suppressRowClickSelection
             onPaginationChanged={onPaginationChanged}
+            rowSelection="single"
+            onGridReady={onGridReady}
+            onModelUpdated={onModelUpdated}
+            onRowClicked={onRowClicked}
           />
         </div>
-      </Grid>
-      <Pagination
+        <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={(page) => gridRef?.current?.api.paginationGoToPage(page)}
+          onPageChange={(page) =>
+            gridRef?.current?.api.paginationGoToPage(page)
+          }
           goPrev={() => gridRef?.current?.api.paginationGoToPreviousPage()}
           goNext={() => gridRef?.current?.api.paginationGoToNextPage()}
           siblingCount={1}
-      />
+        />
+      </Grid>
     </Grid>
   );
 };

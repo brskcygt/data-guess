@@ -29,10 +29,6 @@ export const Pagination = (props: Props) => {
     totalPages
   });
 
-  // if (currentPage === 0 || paginationRange.length < 2) {
-  //   return null;
-  // }
-
   return (
     <PaginationWrapper>
       <CustomButton
@@ -40,10 +36,10 @@ export const Pagination = (props: Props) => {
         disabled={currentPage === 1}
         startIcon={<ArrowBackIosNewIcon />}
       >
-        Önceki
+        Previous
       </CustomButton>
       <div className="pageButtonWrapper">
-        {paginationRange.map((pageNumber) => {
+        {paginationRange.map((pageNumber:any) => {
           if (pageNumber === DOTS) {
             return up(601) ? <span key={new Date().getTime() + Math.random()} className="dots">&#8230;</span> : null;
           }
@@ -68,7 +64,7 @@ export const Pagination = (props: Props) => {
         disabled={currentPage === paginationRange[paginationRange.length - 1] || !paginationRange.length}
         endIcon={<ArrowForwardIosIcon />}
       >
-        Sonraki
+        Next
       </CustomButton>
     </PaginationWrapper>
 

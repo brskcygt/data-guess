@@ -1,21 +1,14 @@
 import { useMediaQuery, useTheme } from '@mui/material';
 
-// Material-UI'nin breakpoints türünü kullanarak bir tür tanımı oluşturun
-type Breakpoints = keyof typeof useTheme()['breakpoints'];
+type Breakpoints = keyof typeof useTheme;
 
 export default function useBreakpoint() {
   const { breakpoints } = useTheme();
-
-  // Breakpoint anahtarlarını ters sırayla alın
   const keys = Object.keys(breakpoints).reverse() as Breakpoints[];
-
-  // Varsayılan genişlik 'xs' olsun
   const valueWidth = keys.reduce((output, key) => {
     const matches = useMediaQuery(breakpoints.up(key));
     return !output && matches ? key : output;
-  }, 'xs'); // Düzeltme: null yerine 'xs' kullanın
-
-  // Medya sorgusu ifadesini düzenlemek için bir işlev tanımlayın
+  }, 'xs');
   const replaceQuery = (mediaFunc: string | null) => mediaFunc?.replace(/^@media( ?)/m, '') ?? false;
 
   return {
